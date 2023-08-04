@@ -2,6 +2,7 @@ import cheerio from "cheerio";
 import search from "./search.js";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
+import axios from "axios";
 
 const getShopsUrl = async (productsUrl, batchSize, keyword) => {
   let b1Progress = 0;
@@ -18,8 +19,8 @@ const getShopsUrl = async (productsUrl, batchSize, keyword) => {
   b1.start(productsUrl.length, 0);
 
   const getShopUrl = async (productUrl) => {
-    const res = await fetch(productUrl);
-    const html = await res.text();
+    const res = await axios.get(productUrl);
+    const html = await res.data;
     //console.log(html);
     const $ = cheerio.load(html);
     let shopUrl;

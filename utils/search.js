@@ -1,12 +1,13 @@
 import cheerio from "cheerio";
+import axios from "axios";
 
 const search = async (keyword, pages) => {
   const singleSearch = async (keyword, pageNo) => {
     const baseUrl = "https://www.etsy.com";
-    const res = await fetch(
+    const res = await axios(
       `${baseUrl}/search?q=${encodeURIComponent(keyword)}`
     );
-    const html = await res.text();
+    const html = await res.data;
     //console.log(html);
     const $ = cheerio.load(html);
     const productUrls = [];

@@ -119,8 +119,20 @@ for (let i = 0; i < keywordsArray.length; i++) {
   }
 }
 //marge all array inside shopsDetailsAll
-const margedShopsDetailsAll = shopsDetailsAll.reduce((a, b) => a.concat(b), []);
+let margedShopsDetailsAll = shopsDetailsAll.reduce((a, b) => a.concat(b), []);
 
+//filter minSales
+if (minSales) {
+  margedShopsDetailsAll = margedShopsDetailsAll.filter(
+    (details) => details.sales >= minSales
+  );
+}
+//filter minReviews
+if (minReviews) {
+  margedShopsDetailsAll = margedShopsDetailsAll.filter(
+    (details) => details.reviewCount >= minReviews
+  );
+}
 const csvSavingSpinner = createSpinner(`Saving CSV file...`);
 try {
   csvSavingSpinner.start();
