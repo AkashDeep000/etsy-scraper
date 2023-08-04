@@ -24,7 +24,7 @@ program
   )
   .option(
     "-o, --output <path>",
-    "Destination of output file (default: './<keywords>.csv')"
+    "Destination of output file (default: 'output.csv')"
   );
 
 program.parse();
