@@ -42,7 +42,7 @@ if (!batchSize) {
   batchSize = 50;
 }
 if (!output) {
-  output = "./output.csv";
+  output = "output.csv";
 }
 //util function for creating increment file name if file already exist
 const writeFile = async (filename, data, increment = 0) => {
