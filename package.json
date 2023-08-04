@@ -1,0 +1,23 @@
+{
+  "name": "etsy",
+  "version": "1.0.0",
+  "description": "Scrape etsy shops details",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "etsy": "./bin/index.js"
+  },
+  "author": "AkashDeep",
+  "license": "ISC",
+  "dependencies": {
+    "@json2csv/plainjs": "^7.0.1",
+    "ansi-colors": "^4.1.3",
+    "cheerio": "^1.0.0-rc.12",
+    "cli-progress": "^3.12.0",
+    "commander": "^11.0.0",
+    "nanospinner": "^1.1.0"
+  }
+}
