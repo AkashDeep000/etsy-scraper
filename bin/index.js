@@ -8,6 +8,7 @@ import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
 import { Parser } from "@json2csv/plainjs";
+import chalk from "chalk";
 
 program
   .option(
@@ -19,7 +20,7 @@ program
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-b, --batchSize <number>",
-    "Number of requests at once (default: 100)"
+    "Number of simultaneoof requests (default: 50)"
   )
   .option(
     "-o, --output <path>",
@@ -38,7 +39,7 @@ if (!pages) {
   pages = 5;
 }
 if (!batchSize) {
-  batchSize = 100;
+  batchSize = 50;
 }
 if (!output) {
   output = "./output.csv";
@@ -75,7 +76,7 @@ try {
 } catch (e) {
   productsSearchSpinner.error();
   console.log(e);
-  process.exit(0);
+  process.exit(1);
 }
 
 for (let i = 0; i < keywordsArray.length; i++) {
@@ -94,7 +95,7 @@ for (let i = 0; i < keywordsArray.length; i++) {
   } catch (e) {
     shopsUrlFinderSpinner.error();
     console.log(e);
-    process.exit(0);
+    process.exit(1);
   }
 }
 
@@ -129,10 +130,15 @@ try {
   if (!fsSync.existsSync()) {
     fsSync.mkdirSync(dir, { recursive: true });
   }
-  await writeFile(output, csv);
+  const filePath = await writeFile(output, csv);
   csvSavingSpinner.success();
+  console.log(
+    chalk.green.bold("File path: ") +
+      chalk.yellow.underline(path.resolve(filePath))
+  );
+  process.exit(0);
 } catch (e) {
   csvSavingSpinner.error();
   console.log(e);
-  process.exit(0);
+  process.exit(1);
 }

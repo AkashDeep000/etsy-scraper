@@ -59,7 +59,7 @@ const getShopsUrl = async (productsUrl, batchSize, keyword) => {
   const shopsUrlFiltered = shopsUrlAll.filter((c, index) => {
     return shopsUrlAll.indexOf(c) === index;
   });
-  return shopsUrlFiltered
+  return shopsUrlFiltered;
 };
 
 export default getShopsUrl;
