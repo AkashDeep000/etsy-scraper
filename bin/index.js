@@ -9,21 +9,21 @@ import fsSync from "fs";
 import path from "path";
 import { Parser } from "@json2csv/plainjs";
 import chalk from "chalk";
+import { RateLimiter } from "limiter-es6-compat";
+import axios from "axios";
+import UserAgent from "user-agents";
 
 program
   .option(
     "-k --keywords <string>",
     "Comma separated keywords for product search"
   )
-  .option(
-    "-p, --pages <number>",
-    "Number of pages to scrape, decrease the number in case of bad request error (default: 5)"
-  )
+  .option("-p, --pages <number>", "Number of pages to scrape (default: 5)")
   .option("-ms, --minSales <number>", "Minimum sales to include")
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
-    "-b, --batchSize <number>",
-    "Number of simultaneous requests, decrease the number in case of bad request error (default: 10)"
+    "-r, --rateLimit <number>",
+    "Number of simultaneous requests, decrease the number in case of bad request error (default: 50)"
   )
   .option(
     "-o, --output <path>",
@@ -31,7 +31,7 @@ program
   );
 
 program.parse();
-let { keywords, pages, minSales, minReviews, batchSize, output } =
+let { keywords, pages, minSales, minReviews, rateLimit, output } =
   program.opts();
 
 if (!keywords) {
@@ -41,12 +41,38 @@ if (!keywords) {
 if (!pages) {
   pages = 5;
 }
-if (!batchSize) {
-  batchSize = 50;
+if (!rateLimit) {
+  rateLimit = 50;
 }
 if (!output) {
   output = "output.csv";
 }
+//setting rate limiter
+const limiter = new RateLimiter({
+  tokensPerInterval: rateLimit,
+  interval: "second",
+});
+
+async function rateLimitedRequest(url) {
+  const remainingRequests = await limiter.removeTokens(1);
+  const userAgent = new UserAgent();
+  const userAgentString = userAgent.toString();
+  const res = await axios.get(url, {
+    timeout: 100000,
+    header: {
+      accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      "accept-language": "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,bn;q=0.6",
+      "cache-control": "no-cache",
+      pragma: "no-cache",
+      "upgrade-insecure-requests": "1",
+      referer: "https://www.google.com/",
+      "user-agent": userAgentString,
+    },
+  });
+  return res.data;
+}
+
 //util function for creating increment file name if file already exist
 const writeFile = async (filename, data, increment = 0) => {
   const name = `${filename.split(path.extname(filename))[0]}${
@@ -73,7 +99,9 @@ const productsSearchSpinner = createSpinner(
 ).start();
 try {
   productsUrlAll = await Promise.all(
-    keywordsArray.map((keyword) => search(keyword, pages))
+    keywordsArray.map((keyword) =>
+      search({ keyword, pages, rateLimitedRequest })
+    )
   );
   productsSearchSpinner.success();
 } catch (e) {
@@ -87,11 +115,11 @@ for (let i = 0; i < keywordsArray.length; i++) {
     `Finding unique shops for ${keywordsArray[i]}...`
   );
   try {
-    const shopsUrl = await getShopsUrl(
-      productsUrlAll[i],
-      batchSize,
-      keywordsArray[i]
-    );
+    const shopsUrl = await getShopsUrl({
+      productsUrl: productsUrlAll[i],
+      keyword: keywordsArray[i],
+      rateLimitedRequest,
+    });
     shopsUrlAll.push(shopsUrl);
     shopsUrlFinderSpinner.start();
     shopsUrlFinderSpinner.success();
@@ -107,11 +135,11 @@ for (let i = 0; i < keywordsArray.length; i++) {
     `Fetching shops details for ${keywordsArray[i]}...`
   );
   try {
-    const shopsDetails = await getShopsDetails(
-      shopsUrlAll[i],
-      batchSize,
-      keywordsArray[i]
-    );
+    const shopsDetails = await getShopsDetails({
+      shopsLink: shopsUrlAll[i],
+      keyword: keywordsArray[i],
+      rateLimitedRequest,
+    });
     shopsDetailsAll.push(shopsDetails);
     shopsDetailsFetcherSpinner.start();
     shopsDetailsFetcherSpinner.success();
@@ -144,6 +172,7 @@ if (margedShopsDetailsAll.length === 0) {
   );
   process.exit(1);
 }
+
 const csvSavingSpinner = createSpinner(`Saving CSV file...`);
 try {
   csvSavingSpinner.start();
