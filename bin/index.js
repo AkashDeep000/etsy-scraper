@@ -9,10 +9,12 @@ import fsSync from "fs";
 import path from "path";
 import { Parser } from "@json2csv/plainjs";
 import chalk from "chalk";
-import { RateLimiter } from "limiter-es6-compat";
+import Bottleneck from "bottleneck";
 import axios from "axios";
-import UserAgent from "user-agents";
+import axiosRetry from "axios-retry";
+import randUserAgent from "rand-user-agent";
 
+//setting up commands
 program
   .option(
     "-k --keywords <string>",
@@ -47,32 +49,77 @@ if (!rateLimit) {
 if (!output) {
   output = "output.csv";
 }
+
+//sleap function
+const sleap = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 //setting rate limiter
-const limiter = new RateLimiter({
-  tokensPerInterval: rateLimit,
-  interval: "second",
+const limiter = new Bottleneck({
+  maxConcurrent: rateLimit,
+  minTime: 1000,
 });
 
-async function rateLimitedRequest(url) {
-  const remainingRequests = await limiter.removeTokens(1);
-  const userAgent = new UserAgent();
-  const userAgentString = userAgent.toString();
-  const res = await axios.get(url, {
-    timeout: 100000,
-    header: {
-      accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-      "accept-language": "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,bn;q=0.6",
-      "cache-control": "no-cache",
-      pragma: "no-cache",
-      "upgrade-insecure-requests": "1",
-      referer: "https://www.google.com/",
-      "user-agent": userAgentString,
+let rateLimited = false;
+let backlogReq = 0;
+
+const rateLimitedRequest = limiter.wrap(async (url) => {
+  axiosRetry(axios, {
+    retries: 10,
+    retryDelay: () => 1000 + backlogReq / rateLimit,
+    onRetry: (retryCount, error) => {
+      rateLimited = true;
+      backlogReq++;
+      if (!rateLimited) {
+        limiter.updateSettings({
+          reservoir: 0,
+          maxConcurrent: rateLimit,
+          minTime: 1000,
+        });
+        console.log(
+          chalk.red.bold(
+            "Failed to fetch, retring " + chalk.yellow(`(${retryCount})`)
+          )
+        );
+        console.log(chalk.green.bold("Started fetching again"));
+        if (rateLimit > 1) {
+          rateLimit = Math.ceil(rateLimit / 2);
+          console.log(
+            chalk.cyan.bold(
+              "Changed rate timit to " +
+                chalk.yellow.bold(rateLimit) +
+                " req/sec"
+            )
+          );
+        }
+      }
     },
   });
-  return res.data;
-}
 
+  try {
+    const res = await axios.get(url, {
+      header: {
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "accept-language": "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,bn;q=0.6",
+        "cache-control": "no-cache",
+        pragma: "no-cache",
+        "upgrade-insecure-requests": "1",
+        referer: "https://www.google.com/",
+        "user-agent": randUserAgent(""),
+      },
+    });
+    rateLimited = true;
+    limiter.updateSettings({
+      reservoir: null,
+      maxConcurrent: rateLimit,
+      minTime: 1000,
+    });
+    // console.log(new Date());
+    return res.data;
+  } catch (e) {
+    throw new Error(e);
+  }
+});
 //util function for creating increment file name if file already exist
 const writeFile = async (filename, data, increment = 0) => {
   const name = `${filename.split(path.extname(filename))[0]}${
