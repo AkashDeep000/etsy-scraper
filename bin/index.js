@@ -11,7 +11,7 @@ import { Parser } from "@json2csv/plainjs";
 import chalk from "chalk";
 import Bottleneck from "bottleneck";
 import axios from "axios";
-import axiosRetry from "axios-retry";
+import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 import randUserAgent from "rand-user-agent";
 
 //setting up commands
@@ -64,8 +64,13 @@ let backlogReq = 0;
 const rateLimitedRequest = limiter.wrap(async (url) => {
   axiosRetry(axios, {
     retries: 10,
-    retryDelay: () => 1000 + backlogReq / rateLimit,
-    onRetry: (retryCount, error) => {
+    retryCondition: (error) => {
+      return isNetworkOrIdempotentRequestError(error) || error.code === 429;
+    },
+    retryDelay: () => {
+      return 1000 + backlogReq / rateLimit;
+    },
+    onRetry: (retryCount) => {
       rateLimited = true;
       backlogReq++;
       if (!rateLimited) {
