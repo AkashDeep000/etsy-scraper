@@ -133,6 +133,14 @@ if (minReviews) {
     (details) => details.reviewCount >= minReviews
   );
 }
+
+// check if margedShopsDetailsAll length before saving
+if (margedShopsDetailsAll.length === 0) {
+  console.log(
+    chalk.red.bold("No shop found:") + chalk.yellow.(" Skipping file save")
+  );
+  process.exit(1);
+}
 const csvSavingSpinner = createSpinner(`Saving CSV file...`);
 try {
   csvSavingSpinner.start();
