@@ -25,7 +25,7 @@ program
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-r, --rateLimit <number>",
-    "Number of requests per second, decrease the number in case of bad request error (default: 50)"
+    "Number of simultaneous requests, decrease the number in case of bad request error (default: 50)"
   )
   .option(
     "-o, --output <path>",
@@ -56,7 +56,6 @@ const sleap = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 //setting rate limiter
 const limiter = new Bottleneck({
   maxConcurrent: rateLimit,
-  minTime: 1000,
 });
 
 let rateLimited = false;
@@ -73,7 +72,6 @@ const rateLimitedRequest = limiter.wrap(async (url) => {
         limiter.updateSettings({
           reservoir: 0,
           maxConcurrent: rateLimit,
-          minTime: 1000,
         });
         console.log(
           chalk.red.bold(
@@ -112,7 +110,6 @@ const rateLimitedRequest = limiter.wrap(async (url) => {
     limiter.updateSettings({
       reservoir: null,
       maxConcurrent: rateLimit,
-      minTime: 1000,
     });
     // console.log(new Date());
     return res.data;
