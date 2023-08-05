@@ -3,15 +3,16 @@ import search from "./search.js";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
 
-
-const getShopsUrl = async ({productsUrl, keyword, rateLimitedRequest}) => {
+const getShopsUrl = async ({ productsUrl, keyword, rateLimitedRequest }) => {
   let b1Progress = 0;
   const b1 = new cliProgress.SingleBar({
     format:
-      `Finding shops |${keyword}|` + colors.cyan("{bar}") + "| {percentage}%",
+      `Finding shops|${keyword}|` + colors.cyan("{bar}") + "| {percentage}%",
     barCompleteChar: "\u2588",
     barIncompleteChar: "\u2591",
     hideCursor: true,
+    autopadding: true,
+    barsize: 20,
   });
 
   b1.start(productsUrl.length, 0);

@@ -10,12 +10,14 @@ const getShopsDetailsAll = async ({
   let b1Progress = 0;
   const b1 = new cliProgress.SingleBar({
     format:
-      `Fetching shops details |${keyword}|` +
+      `Fetching shops details|${keyword}|` +
       colors.cyan("{bar}") +
       "| {percentage}%",
     barCompleteChar: "\u2588",
     barIncompleteChar: "\u2591",
     hideCursor: true,
+    autopadding: true,
+    barsize: 20,
   });
 
   b1.start(shopsLink.length, 0);

@@ -16,14 +16,14 @@ import UserAgent from "user-agents";
 program
   .option(
     "-k --keywords <string>",
-    "Comma separated keywords for product search"
+    'Comma separated keywords for product search (eg: etsy -k "keyword 1, keyword 1,keyword 3")'
   )
   .option("-p, --pages <number>", "Number of pages to scrape (default: 5)")
   .option("-ms, --minSales <number>", "Minimum sales to include")
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-r, --rateLimit <number>",
-    "Number of simultaneous requests, decrease the number in case of bad request error (default: 50)"
+    "Number of requests per second, decrease the number in case of bad request error (default: 50)"
   )
   .option(
     "-o, --output <path>",
