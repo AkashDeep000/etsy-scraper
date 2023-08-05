@@ -15,12 +15,15 @@ program
     "-k --keywords <string>",
     "Comma separated keywords for product search"
   )
-  .option("-p, --pages <number>", "Number of pages to scrape (default: 5)")
+  .option(
+    "-p, --pages <number>",
+    "Number of pages to scrape, decrease the number in case of bad request error (default: 5)"
+  )
   .option("-ms, --minSales <number>", "Minimum sales to include")
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-b, --batchSize <number>",
-    "Number of simultaneous requests, decrease the number is case of bad request error (default: 10)"
+    "Number of simultaneous requests, decrease the number in case of bad request error (default: 10)"
   )
   .option(
     "-o, --output <path>",
