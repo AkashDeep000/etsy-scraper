@@ -82,7 +82,7 @@ const getShopsDetailsAll = async ({
 
     if (!shopDetails.establish) {
       const html = await rateLimitedRequest(
-        `${shopLink.split("?")[0]}/reviews?page=99999`
+        `${shopLink.split("?")[0]}/reviews?page=${shopDetails.reviewCount / 14}`
       );
 
       const $ = cheerio.load(html);
