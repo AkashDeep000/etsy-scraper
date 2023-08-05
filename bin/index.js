@@ -20,7 +20,7 @@ program
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-b, --batchSize <number>",
-    "Number of simultaneoof requests (default: 50)"
+    "Number of simultaneous requests, decrease the number is case of bad request error (default: 10)"
   )
   .option(
     "-o, --output <path>",

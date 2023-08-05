@@ -37,8 +37,7 @@ const getShopsUrl = async (productsUrl, batchSize, keyword) => {
         "user-agent":
           "Mozilla/5.0 (Linux; Android 11; Redmi Note 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36",
       },
-    }
-    );
+    });
     const html = await res.data;
     //console.log(html);
     const $ = cheerio.load(html);
