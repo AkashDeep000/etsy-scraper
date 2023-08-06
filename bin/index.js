@@ -11,7 +11,6 @@ import { Parser } from "@json2csv/plainjs";
 import chalk from "chalk";
 import Bottleneck from "bottleneck";
 import axios from "axios";
-import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 import randUserAgent from "rand-user-agent";
 
 //setting up commands

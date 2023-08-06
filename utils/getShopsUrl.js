@@ -2,17 +2,20 @@ import cheerio from "cheerio";
 import search from "./search.js";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
+import chalk from "chalk";
 
 const getShopsUrl = async ({ productsUrl, keyword, rateLimitedRequest }) => {
+  console.log(
+    chalk.green(`Finding shops for ${keyword} (total: ${productsUrl.length})`)
+  );
   let b1Progress = 0;
   const b1 = new cliProgress.SingleBar({
-    format:
-      `Finding shops|${keyword}|` + colors.cyan("{bar}") + "| {percentage}%",
+    format: colors.cyan("{bar}") + " | {percentage}%",
     barCompleteChar: "\u2588",
     barIncompleteChar: "\u2591",
     hideCursor: true,
     autopadding: true,
-    barsize: 20,
+    barsize: 40,
   });
 
   b1.start(productsUrl.length, 0);

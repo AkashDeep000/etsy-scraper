@@ -1,23 +1,26 @@
 import cheerio from "cheerio";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
+import chalk from "chalk";
 
 const getShopsDetailsAll = async ({
   shopsLink,
   keyword,
   rateLimitedRequest,
 }) => {
+  console.log(
+    chalk.green(
+      `Fetching shops details for ${keyword} (total: ${shopsLink.length})`
+    )
+  );
   let b1Progress = 0;
   const b1 = new cliProgress.SingleBar({
-    format:
-      `Fetching shops details|${keyword}|` +
-      colors.cyan("{bar}") +
-      "| {percentage}%",
+    format: colors.cyan("{bar}") + " | {percentage}%",
     barCompleteChar: "\u2588",
     barIncompleteChar: "\u2591",
     hideCursor: true,
     autopadding: true,
-    barsize: 20,
+    barsize: 40,
   });
 
   b1.start(shopsLink.length, 0);
@@ -82,7 +85,9 @@ const getShopsDetailsAll = async ({
 
     if (!shopDetails.establish) {
       const html = await rateLimitedRequest(
-        `${shopLink.split("?")[0]}/reviews?page=${Math.ceil(shopDetails.reviewCount / 14)}`
+        `${shopLink.split("?")[0]}/reviews?page=${Math.ceil(
+          shopDetails.reviewCount / 14
+        )}`
       );
 
       const $ = cheerio.load(html);
