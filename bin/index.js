@@ -13,6 +13,10 @@ import Bottleneck from "bottleneck";
 import axios from "axios";
 import randUserAgent from "rand-user-agent";
 
+process.on('SIGINT', function() {
+  process.exit();
+});
+
 //setting up commands
 program
   .option(
