@@ -64,9 +64,7 @@ let backlogReq = 0;
 const rateLimitedRequest = limiter.wrap(async (url) => {
   axiosRetry(axios, {
     retries: 10,
-    retryCondition: (error) => {
-      return isNetworkOrIdempotentRequestError(error) || error.code === 429;
-    },
+    retryCondition: e => { return isNetworkOrIdempotentRequestError(e) || e.response.status === 429 },
     retryDelay: () => {
       return 1000 + backlogReq / rateLimit;
     },
