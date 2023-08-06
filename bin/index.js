@@ -25,7 +25,7 @@ program
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-r, --rateLimit <number>",
-    "Number of simultaneous requests, decrease the number in case of bad request error (default: 50)"
+    "Number of requests/second, decrease the number in case of bad request error (default: 50)"
   )
   .option(
     "-o, --output <path>",
@@ -50,52 +50,19 @@ if (!output) {
   output = "output.csv";
 }
 
-//sleap function
+//sleap functiong
 const sleap = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 //setting rate limiter
 const limiter = new Bottleneck({
-  maxConcurrent: rateLimit,
+  minTime: 1000 / rateLimit,
+  maxConcurrent: 10000,
 });
 
 let rateLimited = false;
 let backlogReq = 0;
 
 const rateLimitedRequest = limiter.wrap(async (url) => {
-  axiosRetry(axios, {
-    retries: 10,
-    retryCondition: e => { return isNetworkOrIdempotentRequestError(e) || e.response.status === 429 },
-    retryDelay: () => {
-      return 1000 + backlogReq / rateLimit;
-    },
-    onRetry: (retryCount) => {
-      rateLimited = true;
-      backlogReq++;
-      if (!rateLimited) {
-        limiter.updateSettings({
-          reservoir: 0,
-          maxConcurrent: rateLimit,
-        });
-        console.log(
-          chalk.red.bold(
-            "Failed to fetch, retring " + chalk.yellow(`(${retryCount})`)
-          )
-        );
-        console.log(chalk.green.bold("Started fetching again"));
-        if (rateLimit > 1) {
-          rateLimit = Math.ceil(rateLimit / 2);
-          console.log(
-            chalk.cyan.bold(
-              "Changed rate timit to " +
-                chalk.yellow.bold(rateLimit) +
-                " req/sec"
-            )
-          );
-        }
-      }
-    },
-  });
-
   try {
     const res = await axios.get(url, {
       header: {
@@ -109,12 +76,7 @@ const rateLimitedRequest = limiter.wrap(async (url) => {
         "user-agent": randUserAgent(""),
       },
     });
-    rateLimited = true;
-    limiter.updateSettings({
-      reservoir: null,
-      maxConcurrent: rateLimit,
-    });
-    // console.log(new Date());
+    //console.log(new Date());
     return res.data;
   } catch (e) {
     throw new Error(e);
