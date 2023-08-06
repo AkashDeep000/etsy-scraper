@@ -73,7 +73,7 @@ const rateLimitedRequest = limiter.wrap(async (url) => {
         pragma: "no-cache",
         "upgrade-insecure-requests": "1",
         referer: "https://www.google.com/",
-        "user-agent": randUserAgent(""),
+        "user-agent": "Spinn3r",
       },
     });
     //console.log(new Date());
