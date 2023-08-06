@@ -25,7 +25,7 @@ program
   .option("-mr, --minReviews <number>", "Minimum reviews to include")
   .option(
     "-r, --rateLimit <number>",
-    "Number of requests/second, decrease the number in case of bad request error (default: 50)"
+    "Number of requests/second, decrease the number in case of bad request error (default: 5)"
   )
   .option(
     "-o, --output <path>",
@@ -44,7 +44,7 @@ if (!pages) {
   pages = 5;
 }
 if (!rateLimit) {
-  rateLimit = 50;
+  rateLimit = 5;
 }
 if (!output) {
   output = "output.csv";
