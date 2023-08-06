@@ -6,5 +6,6 @@ COPY . /app
 WORKDIR /app
 # Add your CLI's installation steps here
 RUN npm install && npm link
-RUN mkdir data && cd data
+RUN mkdir data
+WORKDIR /app/data
 ENTRYPOINT ["/usr/local/bin/etsy"]
