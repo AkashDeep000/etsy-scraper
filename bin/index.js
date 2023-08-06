@@ -56,7 +56,7 @@ const sleap = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 //setting rate limiter
 const limiter = new Bottleneck({
   minTime: 1000 / rateLimit,
-  maxConcurrent: 10000,
+  maxConcurrent: rateLimit,
 });
 
 let rateLimited = false;
