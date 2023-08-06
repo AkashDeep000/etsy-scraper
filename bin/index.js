@@ -199,7 +199,7 @@ try {
   csvSavingSpinner.success();
   const fileToLog = () => {
     if (isDocker()) {
-      return `./${filePath}`;
+      return `${filePath}`;
     } else {
       return path.resolve(filePath);
     }
