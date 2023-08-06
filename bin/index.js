@@ -12,8 +12,9 @@ import chalk from "chalk";
 import Bottleneck from "bottleneck";
 import axios from "axios";
 import randUserAgent from "rand-user-agent";
+import isDocker from "is-docker";
 
-process.on('SIGINT', function() {
+process.on("SIGINT", function () {
   process.exit();
 });
 
@@ -196,9 +197,15 @@ try {
   }
   const filePath = await writeFile(output, csv);
   csvSavingSpinner.success();
+  const fileToLog = () => {
+    if (isDocker()) {
+      return `./${filePath}`;
+    } else {
+      return path.resolve(filePath);
+    }
+  };
   console.log(
-    chalk.green.bold("File path: ") +
-      chalk.yellow.underline(path.resolve(filePath))
+    chalk.green.bold("File path: ") + chalk.yellow.underline(fileToLog())
   );
   process.exit(0);
 } catch (e) {
